@@ -14,9 +14,12 @@ UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 # Se asocian la direccion y el puerto 
 UDPServerSocket.bind((localIP, localPort))
 
+#Se define un limite de conexiones cliente/servidor
+connection_limit = 5
+
 print("Servidor UDP inicializado")
 # El servidor espera la llegada de sockets
-while(True):
+while(connection_limit>0):
     #Se reibe el mensaje en bytes del cliente
     bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
     #Se define el mensaje y la direccion en sus respectivas posiciones
@@ -24,14 +27,26 @@ while(True):
     address = bytesAddressPair[1]
 
     #Se imprime el mensaje que se recibio del cliente
-    print(f"Mensaje del cliente: {message}")
+    print(f"Mensaje del cliente: {message}\n")
+    
 
     #Se decodifica el mensaje en ascii 
     message = message.decode(encoding="ascii", errors="ignore")
     # El mensaje del cliente se pasa a mayúscula 
     message = message.upper()
     #Se codifica el mensaje para ser enviado de vuelta
-    message = str.encode(message)
+    message_encoded = str.encode(message)
 
     #Se envia la resouesta al cliente con el mensaje y su respectiva direccion
-    UDPServerSocket.sendto(message, address)
+    UDPServerSocket.sendto(message_encoded, address)   
+
+    # Se verifica si el cliente solicita terminar el envio de caracteres
+    if str(message) == 'FIN':
+        connection_limit = 0     
+
+    #Se verifica si se alcanzo el limite
+    if  connection_limit == 1:
+        break
+
+    # Se le resta 1 al contador del limite de conexiones
+    connection_limit -= 1

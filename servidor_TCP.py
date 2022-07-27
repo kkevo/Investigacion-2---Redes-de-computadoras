@@ -16,7 +16,8 @@ server.listen(1)
 print("Servidor en espera de conexion: ")
 #Se acepta el mensaje del cliente 
 act_con, addr=server.accept()
-
+#Se define un limite de conexiones cliente/servidor
+connection_limit = 5
 # Se forma un loop infinito para la conexion entre servidor y cliente
 while True:
     #Se crea una  variable que recibe el mensaje del cliente
@@ -25,11 +26,17 @@ while True:
     ack_decode=ack.decode(encoding="ascii", errors="ignore")
     #Se imprime en pantalla el mensaje del cliente
     print("Cliente: ",ack_decode)
+    #Se verifica si el cliente solicita terminar el envio de caracteres
+    #o si se alcanzo el limite
+    if ack_decode == "fin" or connection_limit == 1:
+        break
     #Se pasa el mensaje del cliente a mayusculas 
     send=ack_decode.upper()
     #Se imprime que se realizo bien el cambio a mayusculas
     print("Se recibio bien el string y se paso a mayusculas")
     #Se envia la respuesta del servidor al cliente codificada de forma ascii
     act_con.send(send.encode(encoding="ascii", errors="ignore"))
+    # Se le resta 1 al contador del limite de conexiones
+    connection_limit -= 1
     
     
